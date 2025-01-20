@@ -2,7 +2,6 @@
 #define LEVEL_H
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <raylib.h>
 #include "pipe.h"
 
@@ -11,9 +10,13 @@ typedef struct Level {
 	Pipe** pipes;
 	size_t maxPipes;
 	size_t pipeCount;
+	float pipeSpawnTimer;
+	float pipeSpawnFreq;
 } Level;
 
 void LevelInit(Level* l, Texture2D texture);
-void LevelSpawnPipe(Level* l, Vector2 pos, _Bool flipped);
+void LevelSpawnPipe(Level* l, float yPos, _Bool flipped);
+void LevelSpawnPipeGate(Level* l, float yPos, float gapSize);
+void LevelProcess(Level* l, float delta);
 
 #endif

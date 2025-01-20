@@ -41,22 +41,33 @@ Pipe* PipeNew(Texture2D tex,
 	return p;
 }
 
+Rectangle PipeGetBodyRect(Pipe* p) {
+	Rectangle rect;
+	float length;
+	if (!p->flipped) {
+		length = getGlobals()->screenHeight - p->pos.y;
+		rect = (Rectangle){p->pos.x, p->pos.y,
+							   p->texBodySource.width * p->scale, length};
+	} else {
+		length = p->pos.y;
+		rect = (Rectangle){p->pos.x, 0, p->texBodySource.width * p->scale, length};
+	}
+	return rect;
+}
+
 void PipeDraw(Pipe* p) {
 	float length;
-	Rectangle bodyDest, hatDest;
+	Rectangle hatDest;
+	Rectangle bodyDest = PipeGetBodyRect(p);
 	Rectangle hatSource = p->texHatSource;
 	if (!p->flipped) {
 		length = getGlobals()->screenHeight - p->pos.y;
-		bodyDest = (Rectangle){p->pos.x, p->pos.y,
-							   p->texBodySource.width * p->scale, length};
 		hatDest = (Rectangle){p->pos.x + p->hatOffset.x * p->scale,
 							  p->pos.y + p->hatOffset.y * p->scale,
 							  p->texHatSource.width * p->scale,
 							  p->texHatSource.height * p->scale};
 	} else {
 		length = p->pos.y;
-		bodyDest =
-			(Rectangle){p->pos.x, 0, p->texBodySource.width * p->scale, length};
 		hatSource = (Rectangle){hatSource.x, hatSource.y, hatSource.width, -hatSource.height};
 		hatDest = (Rectangle){p->pos.x + p->hatOffset.x * p->scale,
 							  length - (p->texHatSource.height + p->hatOffset.y) * p->scale,
@@ -64,9 +75,9 @@ void PipeDraw(Pipe* p) {
 							  p->texHatSource.height * p->scale};
 	}
 
-	DrawTexturePro(p->texture, hatSource, hatDest, (Vector2){0, 0}, 0,
-				   WHITE);
 	DrawTexturePro(pipeBodyTex,
 				   (Rectangle){0, 0, p->texBodySource.width, length}, bodyDest,
 				   (Vector2){0, 0}, 0, WHITE);
+	DrawTexturePro(p->texture, hatSource, hatDest, (Vector2){0, 0}, 0,
+				   WHITE);
 }

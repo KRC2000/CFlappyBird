@@ -22,7 +22,7 @@ Pipe* PipeNew(Texture2D tex,
 			  Rectangle texHatSource,
 			  Vector2 hatOffset,
 			  _Bool flipped);
-
+Rectangle PipeGetBodyRect(Pipe* p);
 void PipeDraw(Pipe* p);
 
 #endif	// !PIPE
