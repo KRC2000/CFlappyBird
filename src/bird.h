@@ -1,5 +1,5 @@
-#ifndef BIRD
-#define BIRD
+#ifndef BIRD_H
+#define BIRD_H
 
 #include "raylib.h"
 
@@ -10,6 +10,7 @@ typedef struct Bird {
 	Rectangle textureSource;
 	Texture2D texture;
 	Vector2 scale;
+	float radius;
 } Bird;
 
 Bird* BirdNew(Vector2 pos, float flapStrength, Texture2D texture, Vector2 scale);

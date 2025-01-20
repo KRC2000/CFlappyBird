@@ -58,8 +58,8 @@ Rectangle PipeGetBodyRect(Pipe* p) {
 void PipeDraw(Pipe* p) {
 	float length;
 	Rectangle hatDest;
-	Rectangle bodyDest = PipeGetBodyRect(p);
 	Rectangle hatSource = p->texHatSource;
+	Rectangle bodyDest = PipeGetBodyRect(p);
 	if (!p->flipped) {
 		length = getGlobals()->screenHeight - p->pos.y;
 		hatDest = (Rectangle){p->pos.x + p->hatOffset.x * p->scale,
@@ -80,4 +80,6 @@ void PipeDraw(Pipe* p) {
 				   (Vector2){0, 0}, 0, WHITE);
 	DrawTexturePro(p->texture, hatSource, hatDest, (Vector2){0, 0}, 0,
 				   WHITE);
+
+	if (getGlobals()->drawColliders) DrawRectangleLinesEx(bodyDest, 3, PINK);
 }

@@ -43,22 +43,25 @@ void LevelProcess(Level* l, float delta) {
 		l->pipeSpawnTimer = 0;
 	}
 
+	int pipeToFreeIdx = -1;
 	for (size_t i = 0; i < l->pipeCount; i++) {
 		// Move pipes left
 		l->pipes[i]->pos.x -= G->speed * delta;
 
-		// Remove pipes that out of the frame
-		if (l->pipes[i]->pos.x +
-				l->pipes[i]->texBodySource.width * l->pipes[i]->scale <
-			0) {
-			free(l->pipes[i]);
-			// If deleted pipe is not the last in the array - shift elements on
-			// the right from deleted element one index to the left to fill
-			// emptied index
-			if (l->pipeCount != l->maxPipes - 1)
-				memcpy(&l->pipes[i], &l->pipes[i + 1],
-					   sizeof(Pipe*) * (l->maxPipes - 1 - i));
-			l->pipeCount--;
-		}
+		// Find first pipe that is out of screen bounds and should be deleted
+		if (l->pipes[i]->pos.x + l->pipes[i]->texBodySource.width * l->pipes[i]->scale < 0)
+			pipeToFreeIdx = i;
+	}
+
+	// If there is a pipe to delete - delete it
+	if (pipeToFreeIdx != -1) {
+		free(l->pipes[pipeToFreeIdx]);
+		// If deleted pipe is not the last in the array - shift elements on
+		// the right from deleted element one index to the left to fill
+		// emptied index
+		if (l->pipeCount != l->maxPipes - 1)
+			memcpy(&l->pipes[pipeToFreeIdx], &l->pipes[pipeToFreeIdx + 1],
+				   sizeof(Pipe*) * (l->maxPipes - 1 - pipeToFreeIdx));
+		l->pipeCount--;
 	}
 }
