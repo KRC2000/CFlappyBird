@@ -4,9 +4,10 @@
 #include "globals.h"
 #include "raylib.h"
 
-#include "level.h"
 #include "bird.h"
+#include "level.h"
 #include "pipe.h"
+#include "ui.h"
 
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -16,17 +17,22 @@ int main(void) {
 	//--------------------------------------------------------------------------------------
 	setGlobals();
 	Globals* G = getGlobals();
-
+	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 	InitWindow(G->screenWidth, G->screenHeight,
 			   "raylib [core] example - basic window");
 
-	SetTargetFPS(30);  // Set our game to run at 60 frames-per-second
+	SetTargetFPS(0);  // Set our game to run at 60 frames-per-second
 	//--------------------------------------------------------------------------------------
+
+
 	Texture2D texture = LoadTexture("sheet.png");
 	Level* level = malloc(sizeof(Level));
 	LevelInit(level, texture);
 
-	Bird* b = BirdNew((Vector2){50, 0}, 300, texture, (Vector2){8, 8});
+	Bird* b = BirdNew(G->birdStartPos, 300, texture);
+
+	Ui* ui = UiNew(texture);
+	ui->font = LoadFontEx("ArcadeClassic.ttf", 120, 0, 250);
 
 	// Main game loop
 	while (!WindowShouldClose())  // Detect window close button or ESC key
@@ -37,13 +43,40 @@ int main(void) {
 		//----------------------------------------------------------------------------------
 		// TODO: Update your variables here
 		//----------------------------------------------------------------------------------
-
-		if (IsKeyPressed(KEY_SPACE)) {
-			b->speed = (Vector2){0, -b->flapStrength};
+		if (IsWindowResized()) {
+			G->screenWidth = GetScreenWidth();
+			G->screenHeight = GetScreenHeight();
 		}
 
+		if (G->state == PLAY)
+			LevelProcess(level, delta);
 
-		if (G->state == PLAY) LevelProcess(level, delta);
+		if (G->state == DEATH) {
+			if (IsKeyPressed(KEY_R)) {
+				G->state = PLAY;
+				LevelReset(level);
+				BirdReset(b);
+			}
+		}
+
+		if (G->state == MENU) {
+			if (IsKeyPressed(KEY_P)) {
+				G->state = PLAY;
+			}
+		}
+
+		if (G->state == PLAY) {
+			BirdUpdate(b, G->gravity, delta);
+			for (size_t i = 0; i < level->pipeCount; i++) {
+				bool col = CheckCollisionCircleRec(
+					b->pos, b->radius, PipeGetBodyRect(level->pipes[i]));
+				if (col) {
+					G->state = DEATH;
+					writeBestScore(getGlobals()->score);
+				}
+			}
+		}
+
 
 		// Draw
 		//----------------------------------------------------------------------------------
@@ -51,24 +84,10 @@ int main(void) {
 
 		ClearBackground(BLACK);
 
-
-		for (size_t i = 0; i < level->pipeCount; i++)
-			PipeDraw(level->pipes[i]);
-
-		if (G->state == PLAY) {
-			BirdUpdate(b, G->gravity, delta);
-			for (size_t i = 0; i < level->pipeCount; i++) {
-				bool col = CheckCollisionCircleRec(b->pos, b->radius, PipeGetBodyRect(level->pipes[i]));
-				if (col) G->state = DEATH;
-			}
-		}
-
+		//ParallaxLayerDraw(pl);
+		LevelDraw(level);
 		BirdDraw(b);
-
-		if (G->state == DEATH) {
-			DrawText("You crashed!", 0, 0, 40, GREEN);
-			DrawText("Score: 2349", 0, 40, 40, GREEN);
-		}
+		UiDraw(ui);
 
 		EndDrawing();
 		//----------------------------------------------------------------------------------

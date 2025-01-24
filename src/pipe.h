@@ -6,7 +6,6 @@
 typedef struct Pipe {
 	Texture2D texture;
 	Texture2D pipeBodyTex;
-	float scale;
 	_Bool flipped;
 	Rectangle texBodySource;
 	Rectangle texHatSource;

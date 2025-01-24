@@ -15,7 +15,6 @@ Pipe* PipeNew(Texture2D tex,
 	Pipe* p = malloc(sizeof(Pipe));
 
 	p->pos = pos;
-	p->scale = 8;
 	p->texture = tex;
 	p->flipped = flipped;
 	p->texBodySource = texBodySource;
@@ -45,12 +44,12 @@ Rectangle PipeGetBodyRect(Pipe* p) {
 	Rectangle rect;
 	float length;
 	if (!p->flipped) {
-		length = getGlobals()->screenHeight - p->pos.y;
+		length = getGlobals()->screenHeight - (p->pos.y + getGlobals()->bottomPadding);
 		rect = (Rectangle){p->pos.x, p->pos.y,
-							   p->texBodySource.width * p->scale, length};
+							   p->texBodySource.width * getGlobals()->scale, length};
 	} else {
 		length = p->pos.y;
-		rect = (Rectangle){p->pos.x, 0, p->texBodySource.width * p->scale, length};
+		rect = (Rectangle){p->pos.x, 0, p->texBodySource.width * getGlobals()->scale, length};
 	}
 	return rect;
 }
@@ -62,17 +61,17 @@ void PipeDraw(Pipe* p) {
 	Rectangle bodyDest = PipeGetBodyRect(p);
 	if (!p->flipped) {
 		length = getGlobals()->screenHeight - p->pos.y;
-		hatDest = (Rectangle){p->pos.x + p->hatOffset.x * p->scale,
-							  p->pos.y + p->hatOffset.y * p->scale,
-							  p->texHatSource.width * p->scale,
-							  p->texHatSource.height * p->scale};
+		hatDest = (Rectangle){p->pos.x + p->hatOffset.x * getGlobals()->scale,
+							  p->pos.y + p->hatOffset.y * getGlobals()->scale,
+							  p->texHatSource.width * getGlobals()->scale,
+							  p->texHatSource.height * getGlobals()->scale};
 	} else {
 		length = p->pos.y;
 		hatSource = (Rectangle){hatSource.x, hatSource.y, hatSource.width, -hatSource.height};
-		hatDest = (Rectangle){p->pos.x + p->hatOffset.x * p->scale,
-							  length - (p->texHatSource.height + p->hatOffset.y) * p->scale,
-							  p->texHatSource.width * p->scale,
-							  p->texHatSource.height * p->scale};
+		hatDest = (Rectangle){p->pos.x + p->hatOffset.x * getGlobals()->scale,
+							  length - (p->texHatSource.height + p->hatOffset.y) * getGlobals()->scale,
+							  p->texHatSource.width * getGlobals()->scale,
+							  p->texHatSource.height * getGlobals()->scale};
 	}
 
 	DrawTexturePro(pipeBodyTex,
