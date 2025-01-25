@@ -49,17 +49,9 @@ int main(void) {
 
 		LevelProcess(level, delta);
 
-		if (G->state == DEATH) {
-			if (IsKeyPressed(KEY_R)) {
-				G->state = PLAY;
-				LevelReset(level);
-				BirdReset(b);
-				G->score = 0;
-			}
-		}
 
 		if (G->state == MENU) {
-			if (IsKeyPressed(KEY_P)) {
+			if (IsKeyPressed(KEY_ENTER)) {
 				G->state = PLAY;
 			}
 		}
@@ -82,7 +74,21 @@ int main(void) {
 
 			if (pipeCol || ceilingCol || floorCol) {
 				G->state = DEATH;
-				writeBestScore(getGlobals()->score);
+				if(G->score > G->bestScore) {
+					ui->best = true;
+					writeBestScore(getGlobals()->score);
+				}
+			}
+		}
+
+		if (G->state == DEATH) {
+			if (IsKeyPressed(KEY_ENTER)) {
+				G->state = PLAY;
+				LevelReset(level);
+				BirdReset(b);
+				G->score = 0;
+				ui->flapped = false;
+				ui->best = false;
 			}
 		}
 

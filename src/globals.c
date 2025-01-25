@@ -45,15 +45,13 @@ Globals* getGlobals() {
 }
 
 void writeBestScore(unsigned int s) {
-	if (s <= getGlobals()->bestScore) return;
-
 	FILE* f = fopen("score", "wb");
 	if (!f) {
 		printf("INFO: GAME: Couldn't write best score. Failed to write file.\n");
 		return;
 	}
 
-	fwrite(&getGlobals()->score, sizeof(unsigned int), 1, f);
+	fwrite(&s, sizeof(unsigned int), 1, f);
 	printf("INFO: GAME: Best score written: %u.\n", globals.score);
 	fclose(f);
 }

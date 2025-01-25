@@ -1,16 +1,26 @@
 #include "ui.h"
 
+#include <math.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "globals.h"
 #include "raylib.h"
 
 Ui* UiNew(Texture2D texture) {
 	Ui* ui = malloc(sizeof(Ui));
+	ui->flapped = false;
+	ui->best = false;
 	ui->texture = texture;
+	ui->numCharSpacing = 15;
 	ui->startMsgSource = (Rectangle){135, 4, 29, 15};
 	ui->bestMsgSource = (Rectangle){131, 72, 23, 7};
+	ui->newBestMsgSource = (Rectangle){131, 64, 27, 15};
 	ui->overMsgSource = (Rectangle){135, 20, 26, 15};
+	ui->enterSource = (Rectangle){206, 25, 18, 17};
+	ui->spaceSource = (Rectangle){202, 1, 22, 8};
+	ui->scoreSource = (Rectangle){102, 26, 29, 7};
 
 	ui->glyphs = malloc(sizeof(Glyph) * 9);
 	ui->glyphs[0] = (Glyph){'0', (Rectangle){172, 1, 5, 7}};
@@ -48,7 +58,17 @@ void UiDrawNum(Ui* ui, unsigned int num, Vector2 pos, int spacing) {
 	}
 }
 
-Vector2 UiGetNumDrawSize(Ui* ui, unsigned int num, int spacing) {
+static void UiDrawCenterBottomNum(Ui* ui, unsigned int num, float margin) {
+	Vector2 screenCenter = {(float)getGlobals()->screenWidth / 2,
+							(float)getGlobals()->screenHeight / 2};
+
+	Vector2 size = UiGetNumDrawSize(ui, num, ui->numCharSpacing);
+	Vector2 pos = {screenCenter.x - size.x / 2,
+				   getGlobals()->screenHeight - size.y - margin};
+	UiDrawNum(ui, num, pos, ui->numCharSpacing);
+}
+
+static Vector2 UiGetNumDrawSize(Ui* ui, unsigned int num, int spacing) {
 	Vector2 size = {0};
 
 	char* str = malloc(10);
@@ -74,44 +94,106 @@ Vector2 UiGetNumDrawSize(Ui* ui, unsigned int num, int spacing) {
 	return size;
 }
 
+static void UiDrawColumnCentered(Ui* ui,
+								 float padding,
+								 const char* layout,
+								 ...) {
+	va_list ap;
+	va_start(ap, layout);
+
+	Globals* G = getGlobals();
+	Vector2 screenCenter = {(float)G->screenWidth / 2,
+							(float)G->screenHeight / 2};
+	float startY;
+	size_t count = 0;
+	float height = 0;
+
+	// Pass 1: Calculate the height of the resulting column
+	for (size_t i = 0; i < strlen(layout); i++) {
+		if (layout[i] == 'r') {
+			Rectangle source = va_arg(ap, Rectangle);
+			height += source.height * G->scale;
+			count++;
+		}
+		if (layout[i] == 'R') {
+			OffsetRect offRect = va_arg(ap, OffsetRect);
+			height += offRect.rect.height * G->scale;
+			count++;
+		}
+		if (layout[i] == 'u') {
+			unsigned int num = va_arg(ap, unsigned int);
+			height += UiGetNumDrawSize(ui, num, ui->numCharSpacing).y;
+			count++;
+		}
+	}
+
+	if (count > 1)
+		height += padding * (count - 1);
+	startY = screenCenter.y - height / 2;
+
+	va_end(ap);
+
+	// Pass 2: Draw each element
+	va_start(ap, layout);
+	for (size_t i = 0; i < strlen(layout); i++) {
+		if (layout[i] == 'r') {
+			Rectangle source = va_arg(ap, Rectangle);
+			Vector2 destSize = {source.width * getGlobals()->scale,
+								source.height * getGlobals()->scale};
+			Rectangle dest = {screenCenter.x - destSize.x / 2, startY,
+							  destSize.x, destSize.y};
+			DrawTexturePro(ui->texture, source, dest, (Vector2){0}, 0, WHITE);
+			startY += destSize.y + padding;
+		}
+		if (layout[i] == 'R') {
+			OffsetRect offRect = va_arg(ap, OffsetRect);
+			Vector2 destSize = {offRect.rect.width * getGlobals()->scale,
+								offRect.rect.height * getGlobals()->scale};
+			Rectangle dest = {
+				screenCenter.x - destSize.x / 2 + offRect.offset.x,
+				startY + offRect.offset.y, destSize.x, destSize.y};
+			DrawTexturePro(ui->texture, offRect.rect, dest, (Vector2){0}, 0,
+						   WHITE);
+			startY += destSize.y + padding;
+		}
+		if (layout[i] == 'u') {
+			unsigned int num = va_arg(ap, unsigned int);
+			Vector2 destSize = UiGetNumDrawSize(ui, num, ui->numCharSpacing);
+			Vector2 pos = {screenCenter.x - destSize.x / 2, startY};
+			UiDrawNum(ui, num, pos, ui->numCharSpacing);
+			startY += destSize.y + padding;
+		}
+	}
+}
+
 void UiDraw(Ui* ui) {
 	Globals* G = getGlobals();
-	Vector2 center = {(float)G->screenWidth / 2, (float)G->screenHeight / 2};
-	Vector2 scoreSize = UiGetNumDrawSize(ui, G->score, 15);
-	Vector2 scorePos = {center.x - scoreSize.x / 2,
-						G->screenHeight - G->bottomPadding};
+	float waveRangeFactor = 10;
+	float waveSpeed = 10;
+	float wave = sin(G->time * waveSpeed) * waveRangeFactor;
 
 	if (G->state == PLAY) {
-		UiDrawNum(ui, G->score, scorePos, 15);
+		UiDrawCenterBottomNum(ui, G->score, 50);
+
+		if (IsKeyPressed(KEY_SPACE))
+			ui->flapped = true;
+		if (ui->flapped)
+			return;
+
+		OffsetRect offRect = {(Vector2){0, wave}, ui->spaceSource};
+		UiDrawColumnCentered(ui, 0, "R", offRect);
 	}
 
 	if (G->state == DEATH) {
-		Rectangle dest = {center.x - (ui->overMsgSource.width * G->scale) / 2,
-						  center.y - (ui->overMsgSource.height * G->scale) / 2,
-						  ui->overMsgSource.width * G->scale,
-						  ui->overMsgSource.height * G->scale};
-		DrawTexturePro(ui->texture, ui->overMsgSource, dest, (Vector2){0, 0}, 0,
-					   WHITE);
-		UiDrawNum(ui, G->score, scorePos, 15);
+		OffsetRect enter = {(Vector2){0, wave}, ui->enterSource};
+		UiDrawColumnCentered(ui, 30, "ruRr",
+							 ui->best ? ui->newBestMsgSource : ui->scoreSource,
+							 G->score, enter, ui->overMsgSource);
 	}
 
 	if (G->state == MENU) {
-		Rectangle dest = {center.x - (ui->startMsgSource.width * G->scale) / 2,
-						  center.y - (ui->startMsgSource.height * G->scale) / 2,
-						  ui->startMsgSource.width * G->scale,
-						  ui->startMsgSource.height * G->scale};
-		DrawTexturePro(ui->texture, ui->startMsgSource, dest, (Vector2){0, 0},
-					   0, WHITE);
-
-		dest = (Rectangle){center.x - (ui->bestMsgSource.width * G->scale) / 2,
-						   dest.y + 200, ui->bestMsgSource.width * G->scale,
-						   ui->bestMsgSource.height * G->scale};
-
-		DrawTexturePro(ui->texture, ui->bestMsgSource, dest, (Vector2){0, 0}, 0,
-					   WHITE);
-
-		Vector2 size = UiGetNumDrawSize(ui, G->bestScore, 15);
-		Vector2 pos = (Vector2){center.x - size.x / 2, dest.y + 80};
-		UiDrawNum(ui, G->bestScore, pos, 15);
+		OffsetRect enter = {(Vector2){0, wave}, ui->enterSource};
+		UiDrawColumnCentered(ui, 30, "rRru", ui->startMsgSource, enter,
+							 ui->bestMsgSource, G->bestScore);
 	}
 }
