@@ -13,8 +13,8 @@ typedef struct Bird {
 } Bird;
 
 Bird* BirdNew(Vector2 pos, float flapStrength, Texture2D texture);
-void BirdDraw(Bird* b);
 void BirdUpdate(Bird* b, float gravity, float delta);
+void BirdDraw(Bird* b);
 void BirdReset(Bird* b);
 
 #endif	// !BIRD

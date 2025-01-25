@@ -9,6 +9,7 @@ typedef struct Ui {
 	Texture2D texture;
 	Rectangle startMsgSource;
 	Rectangle bestMsgSource;
+	Rectangle overMsgSource;
 	Font font;
 	Glyph* glyphs;
 } Ui;

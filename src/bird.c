@@ -22,16 +22,6 @@ Bird* BirdNew(Vector2 pos,
 	return b;
 }
 
-void BirdDraw(Bird* b) {
-	Vector2 destSize = {b->textureSource.width * getGlobals()->scale,
-						b->textureSource.height * getGlobals()->scale};
-	Rectangle dest = {b->pos.x, b->pos.y, destSize.x, destSize.y};
-	Vector2 origin = {destSize.x / 2, destSize.y / 2};
-	float rot = Clamp(b->speed.y / 10, -90, 90);
-	DrawTexturePro(b->texture, b->textureSource, dest, origin, rot, WHITE);
-	if (getGlobals()->drawColliders) DrawCircleLines(b->pos.x, b->pos.y, b->radius, PINK);
-}
-
 void BirdUpdate(Bird* b, float gravity, float delta) {
 	b->speed.y += gravity * delta;
 	b->pos = Vector2Add(b->pos, Vector2Scale(b->speed, delta));
@@ -42,6 +32,15 @@ void BirdUpdate(Bird* b, float gravity, float delta) {
 	}
 }
 
+void BirdDraw(Bird* b) {
+	Vector2 destSize = {b->textureSource.width * getGlobals()->scale,
+						b->textureSource.height * getGlobals()->scale};
+	Rectangle dest = {b->pos.x, b->pos.y, destSize.x, destSize.y};
+	Vector2 origin = {destSize.x / 2, destSize.y / 2};
+	float rot = Clamp(b->speed.y / 10, -90, 90);
+	DrawTexturePro(b->texture, b->textureSource, dest, origin, rot, WHITE);
+	if (getGlobals()->drawColliders) DrawCircleLines(b->pos.x, b->pos.y, b->radius, PINK);
+}
 
 void BirdReset(Bird* b) {
 	b->pos = getGlobals()->birdStartPos;

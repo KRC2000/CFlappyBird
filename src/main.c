@@ -24,7 +24,6 @@ int main(void) {
 	SetTargetFPS(0);  // Set our game to run at 60 frames-per-second
 	//--------------------------------------------------------------------------------------
 
-
 	Texture2D texture = LoadTexture("sheet.png");
 	Level* level = malloc(sizeof(Level));
 	LevelInit(level, texture);
@@ -48,14 +47,14 @@ int main(void) {
 			G->screenHeight = GetScreenHeight();
 		}
 
-		if (G->state == PLAY)
-			LevelProcess(level, delta);
+		LevelProcess(level, delta);
 
 		if (G->state == DEATH) {
 			if (IsKeyPressed(KEY_R)) {
 				G->state = PLAY;
 				LevelReset(level);
 				BirdReset(b);
+				G->score = 0;
 			}
 		}
 
@@ -67,16 +66,25 @@ int main(void) {
 
 		if (G->state == PLAY) {
 			BirdUpdate(b, G->gravity, delta);
+			bool pipeCol = false;
+			bool ceilingCol = CheckCollisionCircleRec(
+				b->pos, b->radius, (Rectangle){0, -100, G->screenWidth, 100});
+			bool floorCol = CheckCollisionCircleRec(
+				b->pos, b->radius,
+				(Rectangle){0, G->screenHeight - G->bottomPadding,
+							G->screenWidth, G->bottomPadding});
 			for (size_t i = 0; i < level->pipeCount; i++) {
-				bool col = CheckCollisionCircleRec(
+				pipeCol = CheckCollisionCircleRec(
 					b->pos, b->radius, PipeGetBodyRect(level->pipes[i]));
-				if (col) {
-					G->state = DEATH;
-					writeBestScore(getGlobals()->score);
-				}
+
+				if (pipeCol) break;
+			}
+
+			if (pipeCol || ceilingCol || floorCol) {
+				G->state = DEATH;
+				writeBestScore(getGlobals()->score);
 			}
 		}
-
 
 		// Draw
 		//----------------------------------------------------------------------------------
@@ -84,9 +92,10 @@ int main(void) {
 
 		ClearBackground(BLACK);
 
-		//ParallaxLayerDraw(pl);
+		// ParallaxLayerDraw(pl);
 		LevelDraw(level);
-		BirdDraw(b);
+		if (G->state != MENU)
+			BirdDraw(b);
 		UiDraw(ui);
 
 		EndDrawing();

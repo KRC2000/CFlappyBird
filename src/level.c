@@ -63,8 +63,11 @@ void LevelSpawnPipeGate(Level* l, float yPos, float gapSize) {
 }
 
 void LevelProcess(Level* l, float delta) {
+	if (getGlobals()->state == DEATH) return;
 	for (size_t i = 0; i < l->pxLayersCount; i++)
 		ParallaxLayerProcess(&l->pxLayers[i], delta);
+
+	if (getGlobals()->state != PLAY) return;
 
 	l->floorScroll += getGlobals()->speed * delta / getGlobals()->scale;
 
