@@ -1,13 +1,13 @@
 #include "globals.h"
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include "raylib.h"
 
 static Globals globals;
 
 void setGlobals() {
-	globals.drawColliders = true;
+	globals.drawColliders = false;
+	globals.drawFps = false;
 	globals.state = MENU;
 	globals.scale = 8;
 	globals.time = 0;

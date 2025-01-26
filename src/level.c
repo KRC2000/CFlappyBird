@@ -16,6 +16,7 @@ void LevelInit(Level* l, Texture2D texture) {
 	l->pipeSpawnTimer = 0;
 	l->pipeSpawnFreq = 2.5;
 	l->floorSource = (Rectangle){1, 20, 40, 7};
+	l->maxGap = l->minGap = 300;
 
 	// Generate a tiling texture for a floor
 	RenderTexture2D rt =
@@ -29,7 +30,7 @@ void LevelInit(Level* l, Texture2D texture) {
 	// Initialize parallax layers
 	l->pxLayersCount = 7;
 	l->pxLayers = malloc(sizeof(ParallaxLayer) * l->pxLayersCount);
-	float sh = getGlobals()->screenHeight;
+	float sh = getGlobals()->screenHeight - getGlobals()->bottomPadding;
 	l->pxLayers[0] = ParallaxLayerNew(0, (Rectangle){1, 28, 40, 1}, texture);
 	l->pxLayers[1] =
 		ParallaxLayerNew(sh - 500, (Rectangle){42, 35, 40, 3}, texture);
@@ -72,8 +73,9 @@ void LevelProcess(Level* l, float delta) {
 	l->floorScroll += getGlobals()->speed * delta / getGlobals()->scale;
 
 	l->pipeSpawnTimer += delta;
+	l->minGap -= delta;
 	if (l->pipeSpawnTimer >= l->pipeSpawnFreq) {
-		float gap = 300;
+		float gap = GetRandomValue(l->minGap, l->maxGap);
 		int r = GetRandomValue(0, getGlobals()->screenHeight - getGlobals()->bottomPadding - gap);
 		LevelSpawnPipeGate(l, r, gap);
 		l->pipeSpawnTimer = 0;

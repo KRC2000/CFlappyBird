@@ -17,9 +17,9 @@ int main(void) {
 	//--------------------------------------------------------------------------------------
 	setGlobals();
 	Globals* G = getGlobals();
-	SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+	// SetConfigFlags(FLAG_WINDOW_RESIZABLE);
 	InitWindow(G->screenWidth, G->screenHeight,
-			   "raylib [core] example - basic window");
+			   "CFlappy Bird");
 
 	SetTargetFPS(0);  // Set our game to run at 60 frames-per-second
 	//--------------------------------------------------------------------------------------
@@ -49,6 +49,8 @@ int main(void) {
 
 		LevelProcess(level, delta);
 
+		if (IsKeyPressed(KEY_F)) G->drawFps = !G->drawFps;
+		if (IsKeyPressed(KEY_C)) G->drawColliders = !G->drawColliders;
 
 		if (G->state == MENU) {
 			if (IsKeyPressed(KEY_ENTER)) {
@@ -103,6 +105,7 @@ int main(void) {
 		if (G->state != MENU)
 			BirdDraw(b);
 		UiDraw(ui);
+
 
 		EndDrawing();
 		//----------------------------------------------------------------------------------

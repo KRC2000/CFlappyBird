@@ -177,11 +177,10 @@ void UiDraw(Ui* ui) {
 
 		if (IsKeyPressed(KEY_SPACE))
 			ui->flapped = true;
-		if (ui->flapped)
-			return;
-
-		OffsetRect offRect = {(Vector2){0, wave}, ui->spaceSource};
-		UiDrawColumnCentered(ui, 0, "R", offRect);
+		if (!ui->flapped) {
+			OffsetRect offRect = {(Vector2){0, wave}, ui->spaceSource};
+			UiDrawColumnCentered(ui, 0, "R", offRect);
+		}
 	}
 
 	if (G->state == DEATH) {
@@ -195,5 +194,12 @@ void UiDraw(Ui* ui) {
 		OffsetRect enter = {(Vector2){0, wave}, ui->enterSource};
 		UiDrawColumnCentered(ui, 30, "rRru", ui->startMsgSource, enter,
 							 ui->bestMsgSource, G->bestScore);
+	}
+
+	if (G->drawFps) {
+		int fps = GetFPS();
+		char str[11];
+		sprintf(str, "%d", fps);
+		DrawText(str, 0, 0, 30, BLACK);
 	}
 }

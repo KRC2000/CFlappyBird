@@ -8,6 +8,7 @@ enum GameState { PLAY, MENU, DEATH };
 
 typedef struct {
 	bool drawColliders;
+	bool drawFps;
 	enum GameState state;
 	float scale;
 	float time;

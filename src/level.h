@@ -14,6 +14,8 @@ typedef struct Level {
 	size_t pipeCount;
 	float pipeSpawnTimer;
 	float pipeSpawnFreq;
+	float maxGap;
+	float minGap;
 
 	Texture2D floorTexture;
 	Rectangle floorSource;
