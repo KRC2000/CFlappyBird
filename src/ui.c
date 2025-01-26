@@ -22,7 +22,7 @@ Ui* UiNew(Texture2D texture) {
 	ui->spaceSource = (Rectangle){202, 1, 22, 8};
 	ui->scoreSource = (Rectangle){102, 26, 29, 7};
 
-	ui->glyphs = malloc(sizeof(Glyph) * 9);
+	ui->glyphs = malloc(sizeof(Glyph) * 10);
 	ui->glyphs[0] = (Glyph){'0', (Rectangle){172, 1, 5, 7}};
 	ui->glyphs[1] = (Glyph){'1', (Rectangle){179, 1, 3, 7}};
 	ui->glyphs[2] = (Glyph){'2', (Rectangle){184, 1, 5, 7}};

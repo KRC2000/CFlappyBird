@@ -31,7 +31,6 @@ int main(void) {
 	Bird* b = BirdNew(G->birdStartPos, 300, texture);
 
 	Ui* ui = UiNew(texture);
-	ui->font = LoadFontEx("ArcadeClassic.ttf", 120, 0, 250);
 
 	// Main game loop
 	while (!WindowShouldClose())  // Detect window close button or ESC key

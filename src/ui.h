@@ -1,7 +1,6 @@
 #ifndef UI_H
 #define UI_H
 
-#include <stdio.h>
 #include "raylib.h"
 
 #include "glyph.h"
@@ -15,7 +14,6 @@ typedef struct {
 	Rectangle enterSource;
 	Rectangle spaceSource;
 	Rectangle scoreSource;
-	Font font;
 	Glyph* glyphs;
 	float numCharSpacing;
 	bool flapped;
