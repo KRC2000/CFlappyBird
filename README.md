@@ -1,5 +1,9 @@
 # Flappy Bird made in C + Raylib 5.0
 
+
+https://github.com/user-attachments/assets/510b7b79-bf42-440c-b7e0-d6172d4ad035
+
+
 ## Features
 
 - Parallax background
